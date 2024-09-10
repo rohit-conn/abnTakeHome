@@ -5,6 +5,11 @@ from flask import Flask
 
 app = Flask(__name__)
 
+host = os.getenv('FLASK_RUN_HOST', '0.0.0.0')
+port = int(os.getenv('FLASK_RUN_PORT', 5000))
+debug = os.getenv('FLASK_DEBUG', 'False')
+
+
 def generate_log():
     logs = [
         "Processing request...",
@@ -37,5 +42,9 @@ def process_api():
 
     return f"Log: {log_message}"
 
+@app.route('/healthz')
+def health_check():
+    return f"healthy"
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=debug, host=host, port=port)
