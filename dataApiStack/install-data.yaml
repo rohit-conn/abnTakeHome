@@ -1,0 +1,46 @@
+- hosts: localhost
+  connection: local
+  vars:
+    app: "{{ app_name  | default('data_api') }}"
+    docker_repo: "{{ docker_repo_name | default('deathsphinx') }}"
+    docker_image_tag: latest
+    release_namespace: default
+
+
+  tasks:
+
+    - name: Install pip
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+
+    - name: Install Docker SDK for Python using pip
+      ansible.builtin.pip:
+        name: docker
+        state: present
+        executable: pip3
+
+    - name: Build data-api docker container
+      community.docker.docker_image:
+        build:
+          path: ./data_api
+        name: "{{ docker_repo }}/{{ app }}"
+        tag: latest
+        push: true
+        source: build
+       
+    - name: Stat the directory
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/dataapihelm"
+      register: result
+
+    - name: Deploy data api helm
+      kubernetes.core.helm:
+        name: data-api
+        chart_ref: "{{ result.stat.path }}"
+        release_namespace: default
+        create_namespace: false
+        values:
+          image:
+            repository: "{{ docker_repo }}/{{ app }}"
+            tag: "{{ docker_image_tag }}"
