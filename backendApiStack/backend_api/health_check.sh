@@ -1,6 +1,6 @@
 #!/bin/bash
 
-API_URL="http://backend_api/health_check"
+API_URL="http://localhost:$FLASK_RUN_PORT/health_check"
 
 # Log file to store the health check results
 LOG_FILE="/var/log/health_check.log"
