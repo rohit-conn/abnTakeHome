@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "backendapihelm.fullname" . }}
+  labels:
+    {{- include "backendapihelm.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.env.FLASK_RUN_PORT }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "backendapihelm.selectorLabels" . | nindent 4 }}
