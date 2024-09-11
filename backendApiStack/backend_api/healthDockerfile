@@ -1,0 +1,9 @@
+FROM alpine:3.16
+
+RUN apk add --no-cache curl
+
+COPY health_check.sh /usr/local/bin/health_check.sh
+
+RUN chmod +x /usr/local/bin/health_check.sh
+
+CMD ["/usr/local/bin/health_check.sh"]
