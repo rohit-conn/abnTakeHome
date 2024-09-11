@@ -30,7 +30,7 @@ def api_call():
 def health_check():
     return f"healthy"
 
-## Adding a simple return for testing the existnce of environment can be expanded to accomadate return call od download API
+## Adding a simple return for testing the existnce of environment can be expanded to accomadate return call and download API
 @app.route('/download_external_logs')
 def download_external_logs():
     if EXTERNAL_INTGERATION_KEY == "":
