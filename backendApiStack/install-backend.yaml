@@ -1,0 +1,59 @@
+- hosts: localhost
+  connection: local
+  vars:
+    app: "{{ app_name  | default('backend_api') }}"
+    docker_repo: "{{ docker_repo_name | default('deathsphinx') }}"
+    docker_backend_image_tag: latest
+    docker_health_image_tag: health
+
+    release_namespace: default
+
+
+  tasks:
+
+    - name: Install pip
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+
+    - name: Install Docker SDK for Python using pip
+      ansible.builtin.pip:
+        name: docker
+        state: present
+        executable: pip3
+
+    - name: Build backend-api docker container
+      community.docker.docker_image:
+        build:
+          path: ./backend_api
+        name: "{{ docker_repo }}/{{ app }}"
+        tag: "{{ docker_backend_image_tag }}"
+        push: true
+        source: build
+       
+    - name: Build backend-api health docker container
+      community.docker.docker_image:
+        build:
+          path: ./backend_api
+          dockerfile: healthDockerfile
+        name: "{{ docker_repo }}/{{ app }}"
+        tag: "{{ docker_health_image_tag }}"
+        push: true
+        source: build
+
+    - name: Stat the directory
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/backendapihelm"
+      register: result
+
+    - name: Deploy backend api helm
+      kubernetes.core.helm:
+        name: backend-api
+        chart_ref: "{{ result.stat.path }}"
+        release_namespace: default
+        create_namespace: false
+        values:
+          image:
+            repository: "{{ docker_repo }}/{{ app }}"
+            tag: "{{ docker_backend_image_tag }}"
+            healthtag: "{{ docker_health_image_tag }}"
