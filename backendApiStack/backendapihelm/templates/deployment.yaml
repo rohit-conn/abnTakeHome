@@ -38,6 +38,11 @@ spec:
               - name: {{ $key }}
                 value: {{ $value|quote }}
             {{- end }}
+              - name: EXTERNAL_INTGERATION_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: external-integration-key
+                    key: KEY
           ports:
             - name: http
               containerPort: {{ .Values.env.FLASK_RUN_PORT }}

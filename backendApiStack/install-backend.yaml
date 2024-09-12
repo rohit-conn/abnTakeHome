@@ -16,9 +16,13 @@
         name: python3-pip
         state: present
 
-    - name: Install Docker SDK for Python using pip
+    - name: Install python dependencies
       ansible.builtin.pip:
-        name: docker
+        name: 
+          - docker
+          - pyaml
+          - docker
+          - kubernetes
         state: present
         executable: pip3
 
@@ -45,6 +49,19 @@
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/backendapihelm"
       register: result
+
+    - name: Create EXTERNAL_INTEGRATION_KEY to be consumed by backend-api endpoint
+      kubernetes.core.k8s:
+        state: present
+        definition: 
+          apiVersion: v1
+          kind: Secret
+          type: Opaque             
+          metadata:
+            name: external-integration-key
+            namespace: default     
+          data:
+            KEY: "{{ EXTERNAL_INTEGRATION_KEY | b64encode }}"
 
     - name: Deploy backend api helm
       kubernetes.core.helm:
