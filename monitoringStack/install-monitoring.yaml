@@ -1,0 +1,14 @@
+- hosts: localhost
+  connection: local
+
+  tasks:
+  - name: Deploy latest version of Prometheus chart inside monitoring namespace (and create it)
+    kubernetes.core.helm:
+      name: promstack
+      chart_ref: prometheus-community/kube-prometheus-stack
+      release_namespace: monitoring
+      create_namespace: true
+      values:
+        kube-state-metrics:
+          extraArgs:
+            - "--metric-labels-allowlist=pods=[*]"
